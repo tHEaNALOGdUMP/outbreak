@@ -1,0 +1,433 @@
+//OUT BREAK!!
+//Video Game 
+//Sam Manera
+//hackers_2 processing.jpg Image
+//https://devcentral.f5.com/weblogs/images/devcentral_f5_com/weblogs/Joe/WindowsLiveWriter/ClickJackingYourWayIntoOffice_8C3C/hackers_2.jpg
+// ball emmiter code by Nikolaus Gradwohl
+//http://www.local-guru.net/blog/2010/07/02/how-to-make-fireworks-fountains-etc-in-processing
+
+import android.util.DisplayMetrics; 
+float vy;
+float vx;
+float posX;
+float posY;
+float frictionY;
+float frictionX;
+float gravity;
+int hitCount = 0;
+float speed;
+int playerCount = 3;
+int mode = 0;
+int numBars = 8;
+PFont font; 
+PFont font2;
+PFont font3;
+PImage img;
+int NUM = 40;
+PVector[] pos;
+PVector[] vel;
+int[] ttl;
+float angle1, angle2; //emmiter trig complements of nick Lally via Noah Loock
+
+HitBar[] hitBox = new HitBar[numBars];
+HitBar[] hitBox2 = new HitBar[numBars];
+HitBar[] hitBox3 = new HitBar[numBars];
+HitBar[] hitBox4 = new HitBar[numBars];
+HitBar[] hitBox5 = new HitBar[numBars];
+
+
+void setup() {
+  size(displayWidth , displayHeight);
+  DisplayMetrics dm = new DisplayMetrics();
+  getWindowManager().getDefaultDisplay().getMetrics(dm);
+  float density = dm.density; 
+  int densityDpi = dm.densityDpi;
+  //println(vy); 
+ // println(vx);
+  orientation(LANDSCAPE);
+  rectMode(CENTER);
+
+
+ // img = loadImage("hackers_2 processing.jpg"); //internet image 
+
+
+  vy=-2.3; //ball stuff
+  vx=2;
+  posX=mouseX;
+  posY=displayHeight - displayHeight/3;
+  frictionY = -1.1;
+  frictionX = 1;
+  gravity= 0.25;
+
+  pos = new PVector[NUM]; //fire works
+    vel = new PVector[NUM];
+    ttl = new int[NUM];
+    for( int i = 0; i < NUM; i++) {
+        pos[i] = new PVector(0,0);
+        if (i < NUM/2) {
+            vel[i] = new PVector(random(-2,2), random(-10,-5));
+            ttl[i] = int(random(50,100));
+        } else {
+            vel[i] = new PVector(0,0);
+            ttl[i] = int(random(0,50));
+        }
+    }
+
+  for (int i = 0; i < hitBox.length; i++) {
+
+    float x = displayWidth/16 + i*displayWidth/8;
+    hitBox[i] = new HitBar(x, 0 + displayHeight/10); 
+    hitBox2[i] = new HitBar(x, 0 + displayHeight/10+displayHeight/50);
+    hitBox3[i] = new HitBar(x, 0 + displayHeight/10+displayHeight/50*2);
+    hitBox4[i] = new HitBar(x, 0 + displayHeight/10+displayHeight/50*3);
+    hitBox5[i] = new HitBar(x, 0 + displayHeight/10+displayHeight/50*4);
+ 
+}
+ 
+
+  font= loadFont("Shruti-Bold-24.vlw"); //hit counter
+  font2 = loadFont("Shruti-Bold-60.vlw"); //Game Over/Game start
+  font3 = loadFont("Shruti-Bold-100.vlw"); //Game start
+}
+
+
+void draw() {
+  background(0);
+   //image(img, 0, 0);
+  smooth();
+   stroke(1);
+    strokeWeight(1);
+    
+
+  speed = mouseX-pmouseX;
+  textFont(font, 24);
+  text(hitCount, 500, 25);
+  text(playerCount, 100, 25);
+  textFont(font2, 60);
+
+
+  for (int i = 0; i < hitBox.length; i++) { //displays hit bars
+    hitBox[i].display();
+    hitBox[i].hit();
+    hitBox2[i].display();
+    hitBox2[i].hit();
+    hitBox3[i].display();
+    hitBox3[i].hit();
+    hitBox4[i].display();
+    hitBox4[i].hit();
+    hitBox5[i].display();
+    hitBox5[i].hit();
+  }
+
+
+
+  if (posX > displayWidth) { //walls
+    posX=displayWidth;
+    vx*=-frictionX;
+  }               
+  if (posX < 10) {
+    posX=10;
+    vx*=-frictionX;
+  }
+  if (posY <= 10) { //roof
+    posY=10;
+    vy *=-frictionY-1.5;
+  }
+  if (posY >= displayHeight - displayHeight/20 && posY <= displayHeight && mode == 1) { //dead zone
+    playerCount = playerCount-1;
+    mode = 0;
+    vy=-2.3;
+    vx=2;
+    posX=mouseX;
+    posY=displayHeight - displayHeight/7;
+    frictionY = -1.1;
+    frictionX = 1;
+    gravity= 0.25;
+  }
+  if (posY >= 580 && posY <= 600 && mode == 3) { //dead zone advanced mode
+    playerCount = playerCount-1;
+    mode = 2;
+    vy=-2.3;
+    vx=2.2;
+    posX=mouseX;
+    posY=displayHeight - displayHeight/7;
+    frictionY = -1.1;
+    frictionX = 1;
+    gravity= 0.35;
+  }
+
+  if (hitCount == 400) { //Game mode advance trigger
+    hitCount = hitCount+50; //bonus 50 points
+    setup();
+    mode = 2;
+  }
+if (hitCount == 850 && mode == 3){
+  mode = 4;
+}
+
+  if (mode == 0 || mode == 1) {   //padel
+    fill(255);
+    rect(mouseX, displayHeight - displayHeight/6, displayWidth/10, displayHeight/58);
+    if (posY >= displayHeight - displayHeight/9 && posX > (mouseX - displayWidth/16) && posX < mouseX) { //padel impact left
+      vy *=frictionY-0.8;
+      vx =-frictionX-2+speed*1.1;
+    }
+    if (posY >= displayHeight - displayHeight/9 && posX > mouseX && posX < (mouseX+displayWidth/16)) { //padel impact left
+      vy *=frictionY-0.8;
+      vx =+frictionX+2+speed*1.1;
+    }
+  }
+  if (mode ==3 || mode == 2) {     //padel short
+    fill(255);
+    rect(mouseX, displayHeight - displayHeight/16, 75, 20);
+    gravity=0.2;
+    if (posY >= 515 && posX > (mouseX - 37.5) && posX < mouseX) { //padel impact left
+      vy *=frictionY-0.6;
+      vx =-frictionX-0.9+speed*1.1;
+    }
+    if (posY >= 515 && posX > mouseX && posX < (mouseX+37.5)) { //padel impact left
+      vy *=frictionY-0.6;
+      vx =+frictionX+0.9+speed*1.1;
+    }
+  }
+   if (keyPressed && key == 'b' && mode == 0) { // advanced mode toggle
+    mode = 2;
+  }
+
+  if (mode == 0 && playerCount == 3) { //Game start trigger
+    
+     textFont(font3, 100);
+     fill(random(255),random(255),random(255));
+    text("OUT BREAK", 120, 350);
+    fill(255);
+    textFont(font, 24);
+    text("PRESS SPACEBAR TO START", 220, 470);
+     textFont(font, 24);
+    text("PRESS b FOR ADVANCED MODE", 210, 500);
+    ellipse(mouseX + 20, displayHeight - displayHeight/4, 30, 30);
+  }
+  if (mode == 0 && playerCount == 2) {//Game life=2 start
+    fill(255, 0, 0);
+    text("PRESS SPACEBAR", 140, 300);
+    fill(255);
+    ellipse(mouseX, displayHeight - displayHeight/4, 30, 30);
+  }
+  if (mode == 0 && playerCount == 1) {//Game life=1 start
+    fill(255, 0, 0);
+    text("PRESS SPACEBAR", 140, 300);
+    fill(255);
+    ellipse(mouseX, displayHeight - displayHeight/4, 30, 30);
+  }
+  if (mode == 0 && playerCount == 0) {//Game over!!
+    fill(255, 0, 0);
+    text("GAME OVER", 225, 300);
+    fill(255);
+    textFont(font, 24);
+    text("PRESS SPACEBAR TO RESET", 230, 400);
+  }
+  if (mode == 2 && playerCount > 0) {  //gets game started
+    fill(255, 0, 0);
+    text("PRESS SPACEBAR", 140, 300);
+    fill(255);
+    ellipse(mouseX, displayHeight - displayHeight/4, 30, 30);
+  }
+  if (mode == 2 && playerCount > 0 && hitCount >= 400 && hitCount <= 460) { //level advance
+    fill(255, 0, 0);
+    text("PRESS SPACEBAR", 140, 300);
+    text("LEVEL II", 250, 375);
+    fill(255);
+    ellipse(mouseX, displayHeight - displayHeight/4, 30, 30);
+  }
+
+  if (mode == 2 && playerCount == 0) { // Game over man!
+    fill(255, 0, 0);
+    text("GAME OVER", 225, 300);
+    fill(255);
+    textFont(font, 24);
+    text("PRESS SPACEBAR TO RESET", 230, 400);
+  }
+  if (mode == 1 && playerCount == 3) { //starts game
+    fill(255);
+    ellipse(posX, posY, 30, 30);
+    vy += gravity/2; // ball
+    posY = posY + vy; 
+    vx*=frictionX;
+    posX=posX + vx;
+  }
+  if (mode == 1 && playerCount == 2) { //starts game with life 3-1
+    fill(255);
+    ellipse(posX, posY, 30, 30);
+       vy += gravity/2; // ball
+    posY = posY + vy; 
+    vx*=frictionX;
+    posX=posX + vx;
+  }
+  if (mode == 1 && playerCount == 1) {// starts game with life 3-2
+    fill(255);
+    ellipse(posX, posY, 30, 30);
+    vy += gravity/2; // ball
+    posY = posY + vy; 
+    vx*=frictionX;
+    posX=posX + vx;
+    }
+  if (mode == 3 && playerCount == 3) { // starts game in level 2 full health
+    fill(255);
+    ellipse(posX, posY, 30, 30);
+    vy += gravity; // ball
+    posY = posY + vy; 
+    vx*=frictionX;
+    posX=posX + vx;
+  }
+  if (mode == 3 && playerCount == 2) {  // starts game in level 2 full health-1
+    fill(255);
+    ellipse(posX, posY, 15, 15);
+    vy += gravity; // ball
+    posY = posY + vy; 
+    vx*=frictionX;
+    posX=posX + vx;
+  }
+  if (mode == 3 && playerCount == 1) { // starts game in level 2 full health-2
+    fill(255);
+    ellipse(posX, posY, 15, 15);
+    vy += gravity; // ball
+    posY = posY + vy; 
+    vx*=frictionX;
+    posX=posX + vx;
+  }
+  if (mode == 4 && playerCount >= 1) {//you win
+  stroke(random(255),random(255),random(255));
+   textFont(font3, 100);
+     fill(random(255),random(255),random(255));
+    text("YOU WIN!!", 160, 340);
+    fill(255);
+    textFont(font, 24);
+    text("PRESS SPACEBAR TO RESET", 230, 470);
+  }
+if (mode == 4) {
+  
+  
+  
+float ang1 = radians(angle1);
+float ang2 = radians(angle2);
+
+
+  frameRate(25);          // ball emmiter code by Nikolaus Gradwohl
+  stroke(random(255),random(255),random(255));
+    strokeWeight(10);
+
+    for( int i = 0; i < NUM; i++) {
+        point( pos[i].x + width/2 +cos(ang1) * 300.0, pos[i].y + height );
+    }
+
+    for( int i = 0; i < NUM; i++) {
+        pos[i].add( vel[i] );
+        ttl[i]--;
+        if (ttl[i] < 0) {
+            vel[i] = new PVector(random(-2,2), random(-10,-5));
+            pos[i] = new PVector(0,0);
+            ttl[i] = int(random(50,100));
+        }
+    }
+
+ angle1 += 2;
+  angle2 += 15;
+
+  gameMode();
+}
+}
+
+void gameMode() {
+ 
+}
+
+ 
+
+
+
+
+
+void mousePressed() { // makes space bar reset game
+  if (mousePressed && playerCount==0) {
+    mode = 0;
+    setup();
+    playerCount = 3;
+    hitCount = 0;
+  }
+   if (mousePressed && mode ==4) {
+    mode = 0;
+    setup();
+    playerCount = 3;
+    hitCount = 0;
+  }
+  if (mousePressed && mode == 0 && playerCount == 3) { //makes space release ball
+    mode = 1; 
+    vy *=frictionY-3.5;
+    posX=mouseX;
+  }
+  if (mousePressed && mode == 0 && playerCount == 2) {
+    mode = 1;
+    vy *=frictionY-2.5;
+    posX=mouseX;
+  }
+  if (mousePressed && mode == 0 && playerCount == 1) {
+    mode = 1;
+    vy *=frictionY-2.5;
+    posX=mouseX;
+  }
+  if (mousePressed && mode == 2 && playerCount == 3) {
+    mode = 3;
+    vy *=frictionY-2.5;
+    posX=mouseX;
+  }
+  if (mousePressed && mode == 2 && playerCount == 2) {
+    mode = 3;
+    vy *=frictionY-2.5;
+    posX=mouseX;
+  }
+  if (mousePressed && mode == 2 && playerCount == 1) {
+    mode = 3;
+    vy *=frictionY-2.5;
+    posX=mouseX;
+  }
+  if (key == 'x'){
+    mode = 4;
+} 
+}
+
+class HitBar { //hit bars constructor
+  float HBx, HBy;
+  color hitBoxFill;
+
+
+  HitBar(float HB_x, float HB_y) {
+    hitBoxFill = color(random(10, 255), random(10, 255), random(10, 255));
+    HBx = HB_x;
+    HBy = HB_y;
+  }
+
+  void display() {
+    fill(hitBoxFill);
+    rect(HBx, HBy, displayWidth/8, displayHeight/46);
+  }
+
+
+  void hit() {
+
+    if (posX > HBx - displayWidth/16 && posX < HBx + displayWidth/16 && posY > HBy - displayHeight/46 && posY < HBy + displayHeight/46) {
+      HBy = -1000;
+     vy*=frictionY+0.6;
+    // vy *=-frictionY-1.5;
+      hitCount+=10;
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+
